@@ -1,8 +1,8 @@
-const WS_URL = '__WS_URL__';
-const API_URL = '__API_URL__';
+const WS_URL = 'wss://smart-agriculture-system-xiwn.onrender.com';
+const API_URL = 'https://smart-agriculture-system-xiwn.onrender.com/api';
 
 // ─── Password Gate ────────────────────────────────────────────────────────────
-const DASHBOARD_PASSWORD = '__PASSWORD__';
+const DASHBOARD_PASSWORD = 'bhavi@123';
 
 function checkPassword() {
   const input = document.getElementById('password-input').value;
