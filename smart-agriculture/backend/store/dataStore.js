@@ -1,8 +1,12 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
-// Database file stored in backend/data/agri.db
-const DB_PATH = path.join(__dirname, '../data/agri.db');
+// Ensure data directory exists before opening DB
+const DB_DIR = path.join(__dirname, '../data');
+if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
+
+const DB_PATH = path.join(DB_DIR, 'agri.db');
 const db = new Database(DB_PATH);
 
 // Enable WAL mode for better performance

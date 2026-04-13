@@ -3,14 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const { WebSocketServer } = require('ws');
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
 const mqttClient = require('./mqtt/mqttClient');
 const { getLatestReadings, getHistory, getAllHistory, getAlerts, getStats } = require('./store/dataStore');
-
-// Ensure data directory exists
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
 
 const app = express();
 app.use(cors());
