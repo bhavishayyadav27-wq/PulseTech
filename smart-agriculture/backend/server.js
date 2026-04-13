@@ -72,6 +72,18 @@ app.get('/api/status', (req, res) => {
   res.json({ status: 'online', timestamp: new Date().toISOString() });
 });
 
+// One-time cleanup — removes readings with invalid timestamps
+app.delete('/api/cleanup', (req, res) => {
+  const db = require('./store/dataStore');
+  // We access the db directly here
+  const Database = require('better-sqlite3');
+  const path = require('path');
+  const d = new Database(path.join(__dirname, 'data/agri.db'));
+  const result = d.prepare(`DELETE FROM readings WHERE timestamp < '2020-01-01'`).run();
+  d.close();
+  res.json({ deleted: result.changes });
+});
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

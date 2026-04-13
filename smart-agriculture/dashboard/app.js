@@ -3,7 +3,10 @@ const API_URL = 'https://smart-agriculture-system-xiwn.onrender.com/api';
 
 // ─── India Time Helper ────────────────────────────────────────────────────────
 function toIST(timestamp) {
-  return new Date(timestamp).toLocaleString('en-IN', {
+  const d = new Date(timestamp);
+  // Ignore invalid/epoch timestamps (ESP32 millis bug)
+  if (d.getFullYear() < 2020) return 'N/A';
+  return d.toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata',
     day: '2-digit',
     month: 'short',
@@ -16,7 +19,9 @@ function toIST(timestamp) {
 }
 
 function toISTTime(timestamp) {
-  return new Date(timestamp).toLocaleTimeString('en-IN', {
+  const d = new Date(timestamp);
+  if (d.getFullYear() < 2020) return 'N/A';
+  return d.toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata',
     hour: '2-digit',
     minute: '2-digit',
@@ -101,6 +106,9 @@ function setConnectionStatus(online) {
 // ─── Data Processing ──────────────────────────────────────────────────────────
 function processReading(reading, silent = false) {
   const { deviceId } = reading;
+
+  // Skip readings with invalid timestamps (ESP32 millis bug)
+  if (new Date(reading.timestamp).getFullYear() < 2020) return;
 
   // Register device
   if (!devices[deviceId]) {
