@@ -8,6 +8,22 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
+
+  <!-- Password Gate -->
+  <div id="password-gate">
+    <div class="gate-box">
+      <div class="gate-logo">🌱</div>
+      <h2>Smart Agriculture Monitor</h2>
+      <p>Enter password to access the dashboard</p>
+      <input type="password" id="password-input" placeholder="Enter password" autofocus
+             onkeydown="if(event.key==='Enter') checkPassword()" />
+      <button onclick="checkPassword()">Access Dashboard</button>
+      <p id="gate-error" class="gate-error"></p>
+    </div>
+  </div>
+
+  <!-- Main Dashboard (hidden until password correct) -->
+  <div id="main-app" style="display:none">
   <header>
     <div class="header-left">
       <span class="logo">🌱</span>
@@ -96,6 +112,8 @@
       </div>
     </section>
   </main>
+
+  </div><!-- end main-app -->
 
   <script src="app.js"></script>
 </body>

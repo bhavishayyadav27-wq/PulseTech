@@ -3,8 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const { WebSocketServer } = require('ws');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const mqttClient = require('./mqtt/mqttClient');
-const { getLatestReadings, getHistory, getAlerts } = require('./store/dataStore');
+const { getLatestReadings, getHistory, getAllHistory, getAlerts, getStats } = require('./store/dataStore');
+
+// Ensure data directory exists
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
 
 const app = express();
 app.use(cors());
@@ -21,37 +27,55 @@ function broadcast(data) {
     }
   });
 }
-
-// Expose broadcast so MQTT client can use it
 global.broadcast = broadcast;
 
 wss.on('connection', (ws) => {
   console.log('Dashboard client connected');
-  // Send current state on connect
+  // Send current state immediately on connect
   ws.send(JSON.stringify({ type: 'init', data: getLatestReadings() }));
+  // Send recent history for charts
+  ws.send(JSON.stringify({ type: 'history', data: getAllHistory(200) }));
 });
 
-// REST API Routes
+// ─── REST API ─────────────────────────────────────────────────────────────────
+
+// Latest reading per device
 app.get('/api/readings', (req, res) => {
   res.json(getLatestReadings());
 });
 
+// Historical data — ?sensor=soilMoisture&limit=100&deviceId=field-01
 app.get('/api/history', (req, res) => {
-  const { sensor, limit = 50 } = req.query;
-  res.json(getHistory(sensor, parseInt(limit)));
+  const { sensor, limit = 100, deviceId } = req.query;
+  res.json(getHistory(sensor, parseInt(limit), deviceId));
 });
 
+// All history for dashboard charts
+app.get('/api/history/all', (req, res) => {
+  const { limit = 500 } = req.query;
+  res.json(getAllHistory(parseInt(limit)));
+});
+
+// Alerts log
 app.get('/api/alerts', (req, res) => {
-  res.json(getAlerts());
+  const { limit = 100 } = req.query;
+  res.json(getAlerts(parseInt(limit)));
 });
 
+// Stats
+app.get('/api/stats', (req, res) => {
+  res.json(getStats());
+});
+
+// Health check
 app.get('/api/status', (req, res) => {
   res.json({ status: 'online', timestamp: new Date().toISOString() });
 });
 
+// ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`WebSocket server ready`);
+  console.log(`WebSocket ready`);
   mqttClient.connect();
 });

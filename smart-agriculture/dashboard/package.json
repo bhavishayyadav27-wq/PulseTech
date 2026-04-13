@@ -1,0 +1,11 @@
+{
+  "name": "smart-agriculture-dashboard",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js && echo 'Open index.html in browser'"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: smart-agriculture-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: MQTT_BROKER
+        value: mqtt://broker.hivemq.com
+      - key: MQTT_TOPIC_PREFIX
+        value: smart-agri
+      - key: SOIL_MOISTURE_LOW
+        value: 30
+      - key: SOIL_MOISTURE_HIGH
+        value: 80
+      - key: TEMPERATURE_HIGH
+        value: 35
+      - key: HUMIDITY_LOW
+        value: 40
+      - key: HUMIDITY_HIGH
+        value: 90
+    disk:
+      name: agri-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

@@ -1,5 +1,30 @@
-const WS_URL = 'ws://localhost:3000';
-const API_URL = 'http://localhost:3000/api';
+const WS_URL = '__WS_URL__';
+const API_URL = '__API_URL__';
+
+// ─── Password Gate ────────────────────────────────────────────────────────────
+const DASHBOARD_PASSWORD = '__PASSWORD__';
+
+function checkPassword() {
+  const input = document.getElementById('password-input').value;
+  if (input === DASHBOARD_PASSWORD) {
+    sessionStorage.setItem('agri_auth', 'true');
+    document.getElementById('password-gate').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    initDashboard();
+  } else {
+    const err = document.getElementById('gate-error');
+    err.textContent = 'Incorrect password. Try again.';
+    document.getElementById('password-input').value = '';
+    document.getElementById('password-input').focus();
+    setTimeout(() => err.textContent = '', 3000);
+  }
+}
+
+// Auto-unlock if already authenticated this session
+if (sessionStorage.getItem('agri_auth') === 'true') {
+  document.getElementById('password-gate').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+}
 
 // State
 let selectedDevice = null;
@@ -50,7 +75,7 @@ function setConnectionStatus(online) {
 }
 
 // ─── Data Processing ──────────────────────────────────────────────────────────
-function processReading(reading) {
+function processReading(reading, silent = false) {
   const { deviceId } = reading;
 
   // Register device
@@ -62,15 +87,17 @@ function processReading(reading) {
 
   devices[deviceId].latest = reading;
   devices[deviceId].readings.push(reading);
-  if (devices[deviceId].readings.length > 100) devices[deviceId].readings.shift();
+  if (devices[deviceId].readings.length > 500) devices[deviceId].readings.shift();
 
-  if (selectedDevice === deviceId) {
+  if (selectedDevice === deviceId && !silent) {
     updateCards(reading);
     updateCharts(reading);
   }
 
-  document.getElementById('last-update').textContent =
-    'Updated: ' + new Date(reading.timestamp).toLocaleTimeString();
+  if (!silent) {
+    document.getElementById('last-update').textContent =
+      'Updated: ' + new Date(reading.timestamp).toLocaleTimeString();
+  }
 }
 
 // ─── Cards ────────────────────────────────────────────────────────────────────
@@ -276,11 +303,24 @@ function clearAlerts() {
 // ─── Load initial data from REST API ─────────────────────────────────────────
 async function loadInitialData() {
   try {
-    const [readings, alerts] = await Promise.all([
+    const [readings, allHistory, alerts] = await Promise.all([
       fetch(`${API_URL}/readings`).then(r => r.json()),
+      fetch(`${API_URL}/history/all?limit=500`).then(r => r.json()),
       fetch(`${API_URL}/alerts`).then(r => r.json()),
     ]);
+
+    // Load history first (silent — just builds device list and stores readings)
+    allHistory.forEach(r => processReading(r, true));
+
+    // Then update cards with latest
     readings.forEach(r => processReading(r));
+
+    // Rebuild charts from stored history for selected device
+    if (selectedDevice && devices[selectedDevice]) {
+      rebuildChartHistory(devices[selectedDevice].readings);
+      updateCards(devices[selectedDevice].latest);
+    }
+
     alerts.slice(0, 20).reverse().forEach(a => addAlertToUI(a));
   } catch (e) {
     console.warn('Could not load initial data from API:', e.message);
@@ -288,6 +328,13 @@ async function loadInitialData() {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-initCharts();
-connectWS();
-loadInitialData();
+function initDashboard() {
+  initCharts();
+  connectWS();
+  loadInitialData();
+}
+
+// Auto-start if already authenticated
+if (sessionStorage.getItem('agri_auth') === 'true') {
+  initDashboard();
+}
