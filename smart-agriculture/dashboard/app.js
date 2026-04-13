@@ -104,7 +104,7 @@ function processReading(reading, silent = false) {
 
   if (!silent) {
     document.getElementById('last-update').textContent =
-      'Updated: ' + new Date(reading.timestamp).toLocaleTimeString();
+      'Updated: ' + toIST(reading.timestamp);
   }
 }
 
@@ -232,7 +232,7 @@ function initCharts() {
 const MAX_CHART_POINTS = 30;
 
 function updateCharts(reading) {
-  const time = new Date(reading.timestamp).toLocaleTimeString();
+  const time = toIST(reading.timestamp);
 
   // Moisture chart
   pushChartData(charts.moisture, time, reading.soilMoisture);
@@ -294,7 +294,7 @@ function addAlertToUI(alert) {
   item.innerHTML = `
     <span class="alert-icon">${ALERT_ICONS[alert.type] || '📢'}</span>
     <span class="alert-msg">${alert.message}</span>
-    <span class="alert-time">${new Date(alert.timestamp).toLocaleTimeString()}</span>
+    <span class="alert-time">${toIST(alert.timestamp)}</span>
   `;
   list.prepend(item);
 
