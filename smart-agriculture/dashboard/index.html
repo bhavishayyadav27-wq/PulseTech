@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Agriculture Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <span class="logo">🌱</span>
+      <div>
+        <h1>Smart Agriculture Monitor</h1>
+        <p class="subtitle">IoT Field Monitoring System</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="connection-status" class="badge badge-offline">● Connecting...</span>
+      <span id="last-update" class="last-update">--</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Summary Cards -->
+    <section class="cards-grid" id="sensor-cards">
+      <div class="card" id="card-soilMoisture">
+        <div class="card-icon">💧</div>
+        <div class="card-body">
+          <div class="card-label">Soil Moisture</div>
+          <div class="card-value" id="val-soilMoisture">--</div>
+          <div class="card-unit">%</div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-soilMoisture"></div></div>
+        </div>
+        <div class="card-status" id="status-soilMoisture"></div>
+      </div>
+
+      <div class="card" id="card-temperature">
+        <div class="card-icon">🌡️</div>
+        <div class="card-body">
+          <div class="card-label">Temperature</div>
+          <div class="card-value" id="val-temperature">--</div>
+          <div class="card-unit">°C</div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-temperature"></div></div>
+        </div>
+        <div class="card-status" id="status-temperature"></div>
+      </div>
+
+      <div class="card" id="card-humidity">
+        <div class="card-icon">🌫️</div>
+        <div class="card-body">
+          <div class="card-label">Humidity</div>
+          <div class="card-value" id="val-humidity">--</div>
+          <div class="card-unit">%</div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-humidity"></div></div>
+        </div>
+        <div class="card-status" id="status-humidity"></div>
+      </div>
+
+      <div class="card" id="card-light">
+        <div class="card-icon">☀️</div>
+        <div class="card-body">
+          <div class="card-label">Light Intensity</div>
+          <div class="card-value" id="val-light">--</div>
+          <div class="card-unit">lux</div>
+          <div class="progress-bar"><div class="progress-fill" id="bar-light"></div></div>
+        </div>
+        <div class="card-status" id="status-light"></div>
+      </div>
+    </section>
+
+    <!-- Device Selector -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Field Devices</h2>
+        <div id="device-tabs" class="device-tabs"></div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h3>Soil Moisture Over Time</h3>
+        <canvas id="chart-moisture"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Temperature & Humidity</h3>
+        <canvas id="chart-temp-humidity"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Light Intensity</h3>
+        <canvas id="chart-light"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>All Sensors (Latest)</h3>
+        <canvas id="chart-radar"></canvas>
+      </div>
+    </section>
+
+    <!-- Alerts Panel -->
+    <section class="section">
+      <div class="section-header">
+        <h2>🔔 Alerts</h2>
+        <button onclick="clearAlerts()" class="btn-clear">Clear</button>
+      </div>
+      <div id="alerts-list" class="alerts-list">
+        <p class="no-alerts">No alerts yet.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
