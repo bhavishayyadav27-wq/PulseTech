@@ -370,3 +370,211 @@ function initDashboard() {
 if (sessionStorage.getItem('agri_auth') === 'true') {
   initDashboard();
 }
+
+// ─── PDF Report ───────────────────────────────────────────────────────────────
+async function downloadPDFReport() {
+  const btn = document.querySelector('.btn-pdf');
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_URL}/history/all?limit=720`);
+    const allData = await res.json();
+
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    // Filter valid timestamps AND last 1 hour only
+    const data = allData.filter(r => {
+      const ts = new Date(r.timestamp).getTime();
+      return ts > oneHourAgo && new Date(r.timestamp).getFullYear() >= 2020;
+    });
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = 210;
+    const margin = 15;
+    let y = 20;
+
+    // ── Header ──
+    doc.setFillColor(45, 122, 58);
+    doc.rect(0, 0, pageW, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Smart Agriculture Monitor', margin, 13);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('1-Hour Sensor Report', margin, 21);
+    const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    doc.text(`Generated: ${now} IST`, pageW - margin, 21, { align: 'right' });
+
+    y = 40;
+    doc.setTextColor(30, 30, 30);
+
+    if (data.length === 0) {
+      doc.setFontSize(12);
+      doc.text('No data available for the last 1 hour.', margin, y);
+      doc.save('agri-report.pdf');
+      return;
+    }
+
+    // ── Summary Stats ──
+    const moisture = data.map(r => r.soilMoisture).filter(v => v != null);
+    const temp     = data.map(r => r.temperature).filter(v => v != null);
+    const humidity = data.map(r => r.humidity).filter(v => v != null);
+
+    // Derive irrigation from moisture threshold (< 30% = ON)
+    const irrigationON = moisture.filter(v => v < 30).length;
+    const irrigationPct = moisture.length ? Math.round((irrigationON / moisture.length) * 100) : 0;
+
+    function stats(arr) {
+      if (!arr.length) return { min: 'N/A', max: 'N/A', avg: 'N/A' };
+      return {
+        min: Math.min(...arr).toFixed(1),
+        max: Math.max(...arr).toFixed(1),
+        avg: (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1),
+      };
+    }
+
+    const mStats = stats(moisture);
+    const tStats = stats(temp);
+    const hStats = stats(humidity);
+
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Summary Statistics', margin, y);
+    y += 7;
+
+    doc.setFillColor(232, 245, 233);
+    doc.rect(margin, y, pageW - margin * 2, 8, 'F');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Sensor', margin + 3, y + 5.5);
+    doc.text('Min', 80, y + 5.5);
+    doc.text('Max', 110, y + 5.5);
+    doc.text('Average', 140, y + 5.5);
+    doc.text('Readings', 170, y + 5.5);
+    y += 8;
+
+    const rows = [
+      ['Soil Moisture (%)', mStats.min, mStats.max, mStats.avg, moisture.length],
+      ['Temperature (°C)',  tStats.min, tStats.max, tStats.avg, temp.length],
+      ['Humidity (%)',      hStats.min, hStats.max, hStats.avg, humidity.length],
+    ];
+
+    doc.setFont('helvetica', 'normal');
+    rows.forEach((row, i) => {
+      if (i % 2 === 0) { doc.setFillColor(248, 252, 248); doc.rect(margin, y, pageW - margin * 2, 8, 'F'); }
+      doc.text(String(row[0]), margin + 3, y + 5.5);
+      doc.text(String(row[1]), 80, y + 5.5);
+      doc.text(String(row[2]), 110, y + 5.5);
+      doc.text(String(row[3]), 140, y + 5.5);
+      doc.text(String(row[4]), 170, y + 5.5);
+      y += 8;
+    });
+
+    y += 6;
+
+    // ── Irrigation Summary ──
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Irrigation Activity', margin, y);
+    y += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    const irrStatus = irrigationPct > 50 ? 'HIGH — Soil was mostly dry' : irrigationPct > 0 ? 'MODERATE' : 'LOW — Soil moisture was adequate';
+    doc.text(`Readings with low moisture (< 30%): ${irrigationON} of ${moisture.length} (${irrigationPct}%)`, margin + 3, y);
+    y += 6;
+    doc.text(`Irrigation need: ${irrStatus}`, margin + 3, y);
+    y += 12;
+
+    // ── Charts from canvas ──
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Sensor Charts', margin, y);
+    y += 5;
+
+    // Capture existing charts from dashboard canvas
+    const chartIds = [
+      { id: 'chart-moisture',     label: 'Soil Moisture Over Time' },
+      { id: 'chart-temp-humidity', label: 'Temperature & Humidity' },
+    ];
+
+    for (const ch of chartIds) {
+      const canvas = document.getElementById(ch.id);
+      if (!canvas) continue;
+      const imgData = canvas.toDataURL('image/png');
+      const imgW = pageW - margin * 2;
+      const imgH = 55;
+      if (y + imgH + 10 > 285) { doc.addPage(); y = 15; }
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(ch.label, margin, y + 5);
+      y += 7;
+      doc.addImage(imgData, 'PNG', margin, y, imgW, imgH);
+      y += imgH + 8;
+    }
+
+    // ── Readings Table ──
+    doc.addPage();
+    y = 20;
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('Sensor Readings Log', margin, y);
+    y += 7;
+
+    doc.setFillColor(45, 122, 58);
+    doc.rect(margin, y, pageW - margin * 2, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Time (IST)',   margin + 2, y + 5.5);
+    doc.text('Moisture %',  70,  y + 5.5);
+    doc.text('Temp °C',     105, y + 5.5);
+    doc.text('Humidity %',  135, y + 5.5);
+    doc.text('Irrigation',  168, y + 5.5);
+    y += 8;
+
+    doc.setTextColor(30, 30, 30);
+    doc.setFont('helvetica', 'normal');
+
+    data.forEach((r, i) => {
+      if (y > 275) { doc.addPage(); y = 20; }
+      if (i % 2 === 0) { doc.setFillColor(248, 252, 248); doc.rect(margin, y, pageW - margin * 2, 7, 'F'); }
+      // Derive irrigation from moisture
+      const isIrrigating = r.soilMoisture != null && r.soilMoisture < 30;
+      doc.text(toISTTime(r.timestamp),                                    margin + 2, y + 5);
+      doc.text(r.soilMoisture != null ? String(r.soilMoisture) : '-',    70,  y + 5);
+      doc.text(r.temperature  != null ? String(r.temperature)  : '-',    105, y + 5);
+      doc.text(r.humidity     != null ? String(r.humidity)     : '-',    135, y + 5);
+      // Color irrigation status
+      if (isIrrigating) {
+        doc.setTextColor(25, 118, 210);
+        doc.text('ON', 168, y + 5);
+        doc.setTextColor(30, 30, 30);
+      } else {
+        doc.text('OFF', 168, y + 5);
+      }
+      y += 7;
+    });
+
+    // ── Footer ──
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Smart Agriculture IoT Monitoring System — Page ${i} of ${pageCount}`, pageW / 2, 290, { align: 'center' });
+    }
+
+    const filename = `agri-report-${new Date().toISOString().slice(0,10)}.pdf`;
+    doc.save(filename);
+
+  } catch (e) {
+    console.error(e);
+    alert('Failed to generate report: ' + e.message);
+  } finally {
+    btn.textContent = '⬇ 1-Hour Report';
+    btn.disabled = false;
+  }
+}

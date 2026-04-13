@@ -6,6 +6,7 @@
   <title>Smart Agriculture Monitor</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -35,6 +36,7 @@
     <div class="header-right">
       <span id="connection-status" class="badge badge-offline">● Connecting...</span>
       <span id="last-update" class="last-update">--</span>
+      <button class="btn-pdf" onclick="downloadPDFReport()">⬇ 1-Hour Report</button>
     </div>
   </header>
 
