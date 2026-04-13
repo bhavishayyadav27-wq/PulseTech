@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" width="1000" height="620" font-family="Arial, sans-serif">
+
+  <!-- Background -->
+  <rect width="1000" height="620" fill="#0f1923"/>
+
+  <!-- Title -->
+  <text x="500" y="35" fill="#00ff99" font-size="20" font-weight="bold" text-anchor="middle">Smart Agriculture — Circuit Wiring Diagram</text>
+  <text x="500" y="54" fill="#555" font-size="11" text-anchor="middle">ESP32 30-pin + DHT11 + Soil Moisture (HW-103) + SG90 Servo</text>
+
+  <!-- ══════════════════════════════════════
+       ESP32 CENTER
+  ══════════════════════════════════════ -->
+  <rect x="380" y="75" width="200" height="430" rx="12" fill="#0d2b1e" stroke="#00ff99" stroke-width="2.5"/>
+  <text x="480" y="100" fill="#00ff99" font-size="14" font-weight="bold" text-anchor="middle">ESP32</text>
+  <text x="480" y="116" fill="#444" font-size="10" text-anchor="middle">30-pin Dev Board</text>
+
+  <!-- LEFT PINS -->
+  <!-- D34 -->
+  <circle cx="380" cy="180" r="6" fill="#4488ff" stroke="#fff" stroke-width="1.5"/>
+  <text x="372" y="176" fill="#4488ff" font-size="11" text-anchor="end" font-weight="bold">D34</text>
+
+  <!-- GND left -->
+  <circle cx="380" cy="280" r="6" fill="#777" stroke="#fff" stroke-width="1.5"/>
+  <text x="372" y="276" fill="#aaa" font-size="11" text-anchor="end">GND</text>
+
+  <!-- 5V left -->
+  <circle cx="380" cy="360" r="6" fill="#ff8800" stroke="#fff" stroke-width="1.5"/>
+  <text x="372" y="356" fill="#ff8800" font-size="11" text-anchor="end" font-weight="bold">5V</text>
+
+  <!-- RIGHT PINS -->
+  <!-- 3V3 -->
+  <circle cx="580" cy="180" r="6" fill="#ff4444" stroke="#fff" stroke-width="1.5"/>
+  <text x="588" y="176" fill="#ff4444" font-size="11" font-weight="bold">3V3</text>
+
+  <!-- GND right -->
+  <circle cx="580" cy="220" r="6" fill="#777" stroke="#fff" stroke-width="1.5"/>
+  <text x="588" y="216" fill="#aaa" font-size="11">GND</text>
+
+  <!-- D4 -->
+  <circle cx="580" cy="300" r="6" fill="#ffdd00" stroke="#fff" stroke-width="1.5"/>
+  <text x="588" y="296" fill="#ffdd00" font-size="11" font-weight="bold">D4</text>
+
+  <!-- D18 -->
+  <circle cx="580" cy="380" r="6" fill="#ff6600" stroke="#fff" stroke-width="1.5"/>
+  <text x="588" y="376" fill="#ff6600" font-size="11" font-weight="bold">D18</text>
+
+  <!-- GND right 2 -->
+  <circle cx="580" cy="420" r="6" fill="#777" stroke="#fff" stroke-width="1.5"/>
+  <text x="588" y="416" fill="#aaa" font-size="11">GND</text>
+
+
+  <!-- ══════════════════════════════════════
+       DHT11  — top right
+  ══════════════════════════════════════ -->
+  <rect x="700" y="75" width="200" height="110" rx="10" fill="#0a1f3a" stroke="#ffdd00" stroke-width="2"/>
+  <text x="800" y="100" fill="#ffdd00" font-size="14" font-weight="bold" text-anchor="middle">DHT11</text>
+  <text x="800" y="116" fill="#888" font-size="10" text-anchor="middle">Temperature + Humidity</text>
+
+  <!-- DHT11 pin dots -->
+  <circle cx="735" cy="160" r="7" fill="#ff4444" stroke="#fff" stroke-width="1.5"/>
+  <text x="735" y="178" fill="#ff4444" font-size="10" text-anchor="middle">VCC</text>
+
+  <circle cx="800" cy="160" r="7" fill="#ffdd00" stroke="#fff" stroke-width="1.5"/>
+  <text x="800" y="178" fill="#ffdd00" font-size="10" text-anchor="middle">DATA</text>
+
+  <circle cx="865" cy="160" r="7" fill="#777" stroke="#fff" stroke-width="1.5"/>
+  <text x="865" y="178" fill="#aaa" font-size="10" text-anchor="middle">GND</text>
+
+  <!-- DHT11 → ESP32 wires -->
+  <!-- VCC red → 3V3 -->
+  <polyline points="735,160 735,190 620,190 620,180 580,180"
+            fill="none" stroke="#ff4444" stroke-width="2.5"/>
+  <!-- DATA yellow → D4 -->
+  <polyline points="800,160 800,200 630,200 630,300 580,300"
+            fill="none" stroke="#ffdd00" stroke-width="2.5"/>
+  <!-- GND gray → GND right -->
+  <polyline points="865,160 865,210 640,210 640,220 580,220"
+            fill="none" stroke="#777" stroke-width="2.5"/>
+
+
+  <!-- ══════════════════════════════════════
+       SOIL MOISTURE — top left
+  ══════════════════════════════════════ -->
+  <rect x="60" y="75" width="220" height="130" rx="10" fill="#0a1f3a" stroke="#4488ff" stroke-width="2"/>
+  <text x="170" y="100" fill="#4488ff" font-size="14" font-weight="bold" text-anchor="middle">Soil Moisture</text>
+  <text x="170" y="116" fill="#888" font-size="10" text-anchor="middle">HW-103 Module</text>
+
+  <!-- Probe symbol -->
+  <rect x="120" y="125" width="100" height="28" rx="4" fill="#112211" stroke="#4488ff" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="170" y="138" fill="#4488ff" font-size="9" text-anchor="middle">HW-080 Probe</text>
+  <text x="170" y="149" fill="#444" font-size="8" text-anchor="middle">plug into module</text>
+
+  <!-- Soil pins -->
+  <circle cx="95"  cy="183" r="7" fill="#ff4444" stroke="#fff" stroke-width="1.5"/>
+  <text x="95"  y="200" fill="#ff4444" font-size="10" text-anchor="middle">VCC</text>
+
+  <circle cx="145" cy="183" r="7" fill="#777" stroke="#fff" stroke-width="1.5"/>
+  <text x="145" y="200" fill="#aaa" font-size="10" text-anchor="middle">GND</text>
+
+  <circle cx="195" cy="183" r="7" fill="#333" stroke="#555" stroke-width="1.5"/>
+  <text x="195" y="200" fill="#555" font-size="10" text-anchor="middle">DO</text>
+
+  <circle cx="245" cy="183" r="7" fill="#4488ff" stroke="#fff" stroke-width="1.5"/>
+  <text x="245" y="200" fill="#4488ff" font-size="10" text-anchor="middle">AO</text>
+
+  <!-- Soil → ESP32 wires -->
+  <!-- VCC red → 3V3 (dashed shared rail) -->
+  <polyline points="95,183 95,215 355,215 355,180 380,180"
+            fill="none" stroke="#ff4444" stroke-width="2" stroke-dasharray="7,3"/>
+  <!-- GND gray → GND left -->
+  <polyline points="145,183 145,225 350,225 350,280 380,280"
+            fill="none" stroke="#777" stroke-width="2" stroke-dasharray="7,3"/>
+  <!-- AO blue → D34 -->
+  <polyline points="245,183 245,235 340,235 340,180 380,180"
+            fill="none" stroke="#4488ff" stroke-width="2.5"/>
+  <!-- Fix AO direct -->
+  <line x1="245" y1="183" x2="245" y2="183" stroke="#4488ff" stroke-width="2.5"/>
+  <polyline points="245,183 245,240 345,240 345,180 380,180"
+            fill="none" stroke="#4488ff" stroke-width="2.5"/>
+
+
+  <!-- ══════════════════════════════════════
+       SG90 SERVO — bottom right
+  ══════════════════════════════════════ -->
+  <rect x="700" y="320" width="200" height="120" rx="10" fill="#0a1f3a" stroke="#ff6600" stroke-width="2"/>
+  <text x="800" y="345" fill="#ff6600" font-size="14" font-weight="bold" text-anchor="middle">SG90 Servo</text>
+  <text x="800" y="361" fill="#888" font-size="10" text-anchor="middle">Irrigation Valve Control</text>
+
+  <!-- Servo pins -->
+  <circle cx="740" cy="415" r="7" fill="#777" stroke="#fff" stroke-width="1.5"/>
+  <text x="740" y="432" fill="#aaa" font-size="10" text-anchor="middle">Brown</text>
+  <text x="740" y="443" fill="#555" font-size="9" text-anchor="middle">GND</text>
+
+  <circle cx="800" cy="415" r="7" fill="#ff4444" stroke="#fff" stroke-width="1.5"/>
+  <text x="800" y="432" fill="#ff4444" font-size="10" text-anchor="middle">Red</text>
+  <text x="800" y="443" fill="#555" font-size="9" text-anchor="middle">5V</text>
+
+  <circle cx="860" cy="415" r="7" fill="#ff6600" stroke="#fff" stroke-width="1.5"/>
+  <text x="860" y="432" fill="#ff6600" font-size="10" text-anchor="middle">Yellow</text>
+  <text x="860" y="443" fill="#555" font-size="9" text-anchor="middle">Signal</text>
+
+  <!-- Servo → ESP32 wires -->
+  <!-- Brown GND → GND right2 -->
+  <polyline points="740,415 740,460 650,460 650,420 580,420"
+            fill="none" stroke="#777" stroke-width="2.5"/>
+  <!-- Red 5V → 5V left -->
+  <polyline points="800,415 800,470 355,470 355,360 380,360"
+            fill="none" stroke="#ff8800" stroke-width="2.5"/>
+  <!-- Yellow Signal → D18 -->
+  <polyline points="860,415 860,480 660,480 660,380 580,380"
+            fill="none" stroke="#ff6600" stroke-width="2.5"/>
+
+
+  <!-- ══════════════════════════════════════
+       LEGEND
+  ══════════════════════════════════════ -->
+  <rect x="60" y="510" width="840" height="95" rx="10" fill="#0d1a0d" stroke="#333" stroke-width="1.5"/>
+  <text x="480" y="532" fill="#00ff99" font-size="12" font-weight="bold" text-anchor="middle">Pin Connection Summary</text>
+
+  <!-- DHT11 -->
+  <text x="100" y="552" fill="#ffdd00" font-size="11" font-weight="bold">DHT11</text>
+  <text x="100" y="568" fill="#ccc" font-size="10">VCC → 3V3</text>
+  <text x="100" y="582" fill="#ccc" font-size="10">DATA → D4</text>
+  <text x="100" y="596" fill="#ccc" font-size="10">GND → GND</text>
+
+  <!-- Soil -->
+  <text x="280" y="552" fill="#4488ff" font-size="11" font-weight="bold">Soil Moisture</text>
+  <text x="280" y="568" fill="#ccc" font-size="10">VCC → 3V3</text>
+  <text x="280" y="582" fill="#ccc" font-size="10">AO  → D34</text>
+  <text x="280" y="596" fill="#ccc" font-size="10">GND → GND  |  DO = skip</text>
+
+  <!-- Servo -->
+  <text x="530" y="552" fill="#ff6600" font-size="11" font-weight="bold">SG90 Servo</text>
+  <text x="530" y="568" fill="#ccc" font-size="10">Brown → GND</text>
+  <text x="530" y="582" fill="#ccc" font-size="10">Red   → 5V (VIN pin!)</text>
+  <text x="530" y="596" fill="#ccc" font-size="10">Yellow → D18</text>
+
+  <!-- Warning -->
+  <text x="800" y="560" fill="#ff8800" font-size="10" text-anchor="middle">⚠ Servo = 5V only</text>
+  <text x="800" y="575" fill="#888" font-size="10" text-anchor="middle">Sensors = 3.3V only</text>
+  <text x="800" y="590" fill="#555" font-size="9" text-anchor="middle">Never swap VCC + GND</text>
+
+</svg>

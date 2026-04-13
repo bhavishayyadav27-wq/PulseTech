@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Smart Agriculture - Circuit Diagram</title>
+<style>
+  body { background: #111; font-family: monospace; color: #eee; padding: 20px; }
+  h2 { color: #00ff88; text-align: center; }
+  .diagram { display: flex; justify-content: center; margin: 20px 0; }
+  table { border-collapse: collapse; margin: 20px auto; }
+  th { background: #1a3a1a; color: #00ff88; padding: 8px 16px; border: 1px solid #333; }
+  td { padding: 7px 14px; border: 1px solid #333; font-size: 14px; }
+  tr:nth-child(even) { background: #1a1a1a; }
+  .red    { color: #ff4444; font-weight: bold; }
+  .gray   { color: #aaa; }
+  .yellow { color: #ffdd00; font-weight: bold; }
+  .blue   { color: #4488ff; font-weight: bold; }
+  .lblue  { color: #44aaff; font-weight: bold; }
+  .orange { color: #ff6600; font-weight: bold; }
+  .green  { color: #00ff88; font-weight: bold; }
+  h3 { color: #00ff88; margin-top: 30px; text-align:center; }
+  .note { background: #1a2a1a; border-left: 4px solid #00ff88; padding: 10px 16px; margin: 10px auto; max-width: 700px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h2>🌱 Smart Agriculture — Circuit Wiring Diagram</h2>
+
+<div class="diagram">
+  <!-- Embed the SVG inline -->
+  <img src="circuit.svg" width="1100" height="750" style="border:1px solid #333; border-radius:10px; max-width:100%;"/>
+</div>
+
+<h3>📋 DHT11 — Temperature &amp; Humidity Sensor</h3>
+<table>
+  <tr><th>DHT11 Pin</th><th>Wire Color</th><th>ESP32 Shield Pin</th></tr>
+  <tr><td class="red">VCC</td><td class="red">Red</td><td class="red">3.3V</td></tr>
+  <tr><td class="yellow">DATA</td><td class="yellow">Yellow</td><td class="yellow">D4</td></tr>
+  <tr><td class="gray">GND</td><td class="gray">Black</td><td class="gray">GND</td></tr>
+</table>
+
+<h3>💧 Soil Moisture — HW-103 Module + HW-080 Probe</h3>
+<div class="note">⚠️ First plug the HW-080 fork probe into the 2 bare pins on the HW-103 board, then connect HW-103 to ESP32.</div>
+<table>
+  <tr><th>HW-103 Pin</th><th>Wire Color</th><th>ESP32 Shield Pin</th></tr>
+  <tr><td class="red">VCC</td><td class="red">Red</td><td class="red">3.3V</td></tr>
+  <tr><td class="gray">GND</td><td class="gray">Black</td><td class="gray">GND</td></tr>
+  <tr><td class="gray">DO</td><td class="gray">—</td><td class="gray">Not connected</td></tr>
+  <tr><td class="blue">AO</td><td class="blue">Blue/White</td><td class="blue">D34</td></tr>
+</table>
+
+<h3>☀️ LDR — Light Sensor Module</h3>
+<table>
+  <tr><th>LDR Module Pin</th><th>Wire Color</th><th>ESP32 Shield Pin</th></tr>
+  <tr><td class="red">VCC</td><td class="red">Red</td><td class="red">3.3V</td></tr>
+  <tr><td class="gray">GND</td><td class="gray">Black</td><td class="gray">GND</td></tr>
+  <tr><td class="gray">DO</td><td class="gray">—</td><td class="gray">Not connected</td></tr>
+  <tr><td class="lblue">AO</td><td class="lblue">Blue</td><td class="lblue">D35</td></tr>
+</table>
+
+<h3>⚙️ SG90 Servo Motor — Irrigation Valve</h3>
+<div class="note">⚠️ Servo needs 5V — connect Red wire to the <strong>5V / VN</strong> pin on the shield, NOT 3.3V.</div>
+<table>
+  <tr><th>Servo Wire</th><th>Color</th><th>ESP32 Shield Pin</th></tr>
+  <tr><td class="gray">GND</td><td class="gray">Brown / Black</td><td class="gray">GND</td></tr>
+  <tr><td class="red">Power</td><td class="red">Red</td><td class="red">5V (VN pin)</td></tr>
+  <tr><td class="orange">Signal</td><td class="orange">Yellow / Orange</td><td class="orange">D18</td></tr>
+</table>
+
+<h3>📌 Quick Reference — ESP32 Shield Pins Used</h3>
+<table>
+  <tr><th>ESP32 Pin</th><th>Connected To</th></tr>
+  <tr><td class="yellow">D4</td><td>DHT11 DATA</td></tr>
+  <tr><td class="blue">D34</td><td>Soil Moisture AO</td></tr>
+  <tr><td class="lblue">D35</td><td>LDR AO</td></tr>
+  <tr><td class="orange">D18</td><td>Servo Signal</td></tr>
+  <tr><td class="red">3.3V</td><td>DHT11, Soil Module, LDR (VCC)</td></tr>
+  <tr><td class="red">5V (VN)</td><td>Servo Red wire</td></tr>
+  <tr><td class="gray">GND</td><td>All GND wires</td></tr>
+</table>
+
+</body>
+</html>

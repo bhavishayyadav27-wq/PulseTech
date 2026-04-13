@@ -24,8 +24,8 @@
 #include <ESP32Servo.h>
 
 // ─── CHANGE THESE ─────────────────────────────────────────────────────────────
-const char* WIFI_SSID     = "YOUR_WIFI_SSID";
-const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+const char* WIFI_SSID     = "HELLO";
+const char* WIFI_PASSWORD = "12345678";
 const char* DEVICE_ID     = "field-01";
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -37,7 +37,6 @@ const char* TOPIC_PREFIX = "smart-agri";
 #define DHT_PIN       4
 #define DHT_TYPE      DHT11    // <-- DHT11 (not DHT22)
 #define SOIL_PIN      34
-#define LIGHT_PIN     35
 #define SERVO_PIN     18
 
 // ─── Soil Moisture Calibration ────────────────────────────────────────────────
@@ -173,17 +172,11 @@ float readSoilMoisture() {
   return constrain(pct, 0.0f, 100.0f);
 }
 
-int readLightLux() {
-  int raw = analogRead(LIGHT_PIN);
-  return map(raw, 0, 4095, 0, 1500);
-}
-
 // ─── Publish Sensor Data ──────────────────────────────────────────────────────
 void publishSensorData() {
   float temperature  = dht.readTemperature();
   float humidity     = dht.readHumidity();
   float soilMoisture = readSoilMoisture();
-  int   light        = readLightLux();
 
   if (isnan(temperature) || isnan(humidity)) {
     Serial.println("DHT11 read failed — check wiring on GPIO 4");
@@ -204,7 +197,6 @@ void publishSensorData() {
   doc["soilMoisture"]  = round(soilMoisture * 10) / 10.0;
   doc["temperature"]   = round(temperature * 10) / 10.0;
   doc["humidity"]      = round(humidity * 10) / 10.0;
-  doc["light"]         = light;
   doc["irrigation"]    = irrigationOn;
   doc["timestamp"]     = millis();
 
@@ -212,8 +204,8 @@ void publishSensorData() {
   serializeJson(doc, buf);
 
   if (mqttClient.publish(sensorTopic, buf, false)) {
-    Serial.printf("[OK] Moisture:%.1f%% Temp:%.1f°C Hum:%.1f%% Light:%d lux Irrigation:%s\n",
-                  soilMoisture, temperature, humidity, (float)light,
+    Serial.printf("[OK] Moisture:%.1f%% Temp:%.1f°C Hum:%.1f%% Irrigation:%s\n",
+                  soilMoisture, temperature, humidity,
                   irrigationOn ? "ON" : "OFF");
   } else {
     Serial.println("[FAIL] MQTT publish failed");

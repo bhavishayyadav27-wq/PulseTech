@@ -31,6 +31,8 @@ function connectWS() {
     const msg = JSON.parse(event.data);
     if (msg.type === 'init') {
       msg.data.forEach(r => processReading(r));
+    } else if (msg.type === 'history') {
+      msg.data.forEach(r => processReading(r, true));
     } else if (msg.type === 'sensorUpdate') {
       processReading(msg.data);
     } else if (msg.type === 'alert') {
@@ -77,7 +79,6 @@ function updateCards(reading) {
     { key: 'soilMoisture', max: 100 },
     { key: 'temperature', max: 50 },
     { key: 'humidity', max: 100 },
-    { key: 'light', max: 1500 },
   ];
 
   sensors.forEach(({ key, max }) => {
@@ -115,8 +116,7 @@ function getSensorState(key, val) {
   if (key === 'light') {
     if (val < t.low) return { state: 'info', label: 'Low' };
   }
-  return { state: 'ok', label: 'Normal' };
-}
+  return { state: 'ok', label: 'Normal' };}
 
 // ─── Device Tabs ──────────────────────────────────────────────────────────────
 function renderDeviceTabs() {
@@ -180,17 +180,11 @@ function initCharts() {
     options: { ...commonOptions, plugins: { legend: { display: true } } },
   });
 
-  charts.light = new Chart(document.getElementById('chart-light'), {
-    type: 'bar',
-    data: { labels: [], datasets: [{ label: 'Light (lux)', data: [], backgroundColor: 'rgba(249,168,37,0.7)', borderColor: '#f9a825', borderWidth: 1 }] },
-    options: { ...commonOptions, plugins: { legend: { display: true } } },
-  });
-
   charts.radar = new Chart(document.getElementById('chart-radar'), {
     type: 'radar',
     data: {
-      labels: ['Soil Moisture', 'Temperature', 'Humidity', 'Light'],
-      datasets: [{ label: 'Current', data: [0, 0, 0, 0], borderColor: '#2d7a3a', backgroundColor: 'rgba(45,122,58,0.2)', pointBackgroundColor: '#2d7a3a' }],
+      labels: ['Soil Moisture', 'Temperature', 'Humidity'],
+      datasets: [{ label: 'Current', data: [0, 0, 0], borderColor: '#2d7a3a', backgroundColor: 'rgba(45,122,58,0.2)', pointBackgroundColor: '#2d7a3a' }],
     },
     options: {
       responsive: true,
@@ -220,15 +214,11 @@ function updateCharts(reading) {
   th.data.datasets[1].data.push(reading.humidity);
   th.update('none');
 
-  // Light chart
-  pushChartData(charts.light, time, reading.light);
-
   // Radar — normalize to 0-100
   charts.radar.data.datasets[0].data = [
     reading.soilMoisture,
     Math.min(100, (reading.temperature / 50) * 100),
     reading.humidity,
-    Math.min(100, (reading.light / 1500) * 100),
   ];
   charts.radar.update('none');
 }
@@ -245,7 +235,7 @@ function pushChartData(chart, label, value) {
 
 function rebuildChartHistory(readings) {
   // Clear charts
-  [charts.moisture, charts.light].forEach(c => {
+  [charts.moisture].forEach(c => {
     c.data.labels = []; c.data.datasets[0].data = []; c.update('none');
   });
   charts.tempHumidity.data.labels = [];
