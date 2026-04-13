@@ -1,6 +1,14 @@
 const WS_URL = 'wss://smart-agriculture-system-xiwn.onrender.com';
 const API_URL = 'https://smart-agriculture-system-xiwn.onrender.com/api';
 
+// ─── India Time Helper ────────────────────────────────────────────────────────
+function toIST(timestamp) {
+  return new Date(timestamp).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+function toISTFull(timestamp) {
+  return new Date(timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+}
+
 // ─── Password Gate ────────────────────────────────────────────────────────────
 const DASHBOARD_PASSWORD = 'bhavi@123';
 
