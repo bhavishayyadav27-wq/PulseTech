@@ -3,10 +3,26 @@ const API_URL = 'https://smart-agriculture-system-xiwn.onrender.com/api';
 
 // ─── India Time Helper ────────────────────────────────────────────────────────
 function toIST(timestamp) {
-  return new Date(timestamp).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return new Date(timestamp).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
 }
-function toISTFull(timestamp) {
-  return new Date(timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+function toISTTime(timestamp) {
+  return new Date(timestamp).toLocaleTimeString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
 }
 
 // ─── Password Gate ────────────────────────────────────────────────────────────
@@ -232,7 +248,7 @@ function initCharts() {
 const MAX_CHART_POINTS = 30;
 
 function updateCharts(reading) {
-  const time = toIST(reading.timestamp);
+  const time = toISTTime(reading.timestamp);
 
   // Moisture chart
   pushChartData(charts.moisture, time, reading.soilMoisture);

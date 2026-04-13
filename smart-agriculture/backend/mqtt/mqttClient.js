@@ -58,11 +58,10 @@ function connect() {
 function handleSensorData(deviceId, payload) {
   const reading = {
     deviceId,
-    timestamp: payload.timestamp || new Date().toISOString(),
+    timestamp: new Date().toISOString(),  // always use server time (IST-aware)
     soilMoisture: payload.soilMoisture,
     temperature: payload.temperature,
     humidity: payload.humidity,
-    light: payload.light,
   };
 
   saveReading(reading);
