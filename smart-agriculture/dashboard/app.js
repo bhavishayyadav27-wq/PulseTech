@@ -61,6 +61,8 @@ let devices = {};
 let historyData = { soilMoisture: [], temperature: [], humidity: [], light: [] };
 let charts = {};
 let ws;
+let deviceTimeouts = {};           // per-device offline timer
+const DEVICE_TIMEOUT_MS = 30000;   // 30s no data = device offline
 
 // Thresholds for UI status
 const THRESHOLDS = {
@@ -74,12 +76,22 @@ const THRESHOLDS = {
 function connectWS() {
   ws = new WebSocket(WS_URL);
 
-  ws.onopen = () => setConnectionStatus(true);
+  ws.onopen = () => {
+    const el = document.getElementById('connection-status');
+    el.textContent = '● Server Connected';
+    el.className = 'badge badge-online';
+  };
   ws.onclose = () => {
-    setConnectionStatus(false);
+    const el = document.getElementById('connection-status');
+    el.textContent = '● Server Disconnected';
+    el.className = 'badge badge-offline';
     setTimeout(connectWS, 3000);
   };
-  ws.onerror = () => setConnectionStatus(false);
+  ws.onerror = () => {
+    const el = document.getElementById('connection-status');
+    el.textContent = '● Server Disconnected';
+    el.className = 'badge badge-offline';
+  };
 
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
@@ -103,6 +115,44 @@ function setConnectionStatus(online) {
   el.className = `badge ${online ? 'badge-online' : 'badge-offline'}`;
 }
 
+// ─── Device Online/Offline Tracking ──────────────────────────────────────────
+function markDeviceOnline(deviceId) {
+  // Clear existing timeout
+  if (deviceTimeouts[deviceId]) clearTimeout(deviceTimeouts[deviceId]);
+
+  // Update device status
+  if (devices[deviceId]) devices[deviceId].online = true;
+  updateDeviceBadge(deviceId, true);
+
+  // Set timeout — if no data in 30s, mark offline
+  deviceTimeouts[deviceId] = setTimeout(() => {
+    if (devices[deviceId]) devices[deviceId].online = false;
+    updateDeviceBadge(deviceId, false);
+    // Update header if this is selected device
+    if (deviceId === selectedDevice) {
+      const el = document.getElementById('connection-status');
+      el.textContent = '● Device Offline';
+      el.className = 'badge badge-offline';
+    }
+  }, DEVICE_TIMEOUT_MS);
+
+  // Update header badge for selected device
+  if (deviceId === selectedDevice) {
+    const el = document.getElementById('connection-status');
+    el.textContent = '● ESP32 Online';
+    el.className = 'badge badge-online';
+  }
+}
+
+function updateDeviceBadge(deviceId, online) {
+  const tabs = document.querySelectorAll('.device-tab');
+  tabs.forEach(tab => {
+    if (tab.textContent.replace(/[🟢🔴]/g, '').trim() === deviceId) {
+      tab.textContent = (online ? '🟢 ' : '🔴 ') + deviceId;
+    }
+  });
+}
+
 // ─── Data Processing ──────────────────────────────────────────────────────────
 function processReading(reading, silent = false) {
   const { deviceId } = reading;
@@ -120,6 +170,8 @@ function processReading(reading, silent = false) {
   devices[deviceId].latest = reading;
   devices[deviceId].readings.push(reading);
   if (devices[deviceId].readings.length > 500) devices[deviceId].readings.shift();
+
+  if (!silent) markDeviceOnline(deviceId);
 
   if (selectedDevice === deviceId && !silent) {
     updateCards(reading);
