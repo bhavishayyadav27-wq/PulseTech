@@ -250,3 +250,5 @@ main { max-width: 1400px; margin: 0 auto; padding: 24px 24px; }
   transition: background 0.2s;
 }
 .btn-pdf:hover { background: #c8e6c9; }
+
+.status-offline { background: #eeeeee; color: #888; }

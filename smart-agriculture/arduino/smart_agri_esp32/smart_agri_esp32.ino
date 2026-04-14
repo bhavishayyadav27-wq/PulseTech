@@ -121,7 +121,17 @@ void connectMQTT() {
   snprintf(clientId, sizeof(clientId), "agri-%s-%lu", DEVICE_ID, millis());
   Serial.print("Connecting to MQTT...");
   int tries = 0;
-  while (!mqttClient.connect(clientId) && tries < 5) {
+
+  // Last Will Testament — broker publishes this if ESP32 drops unexpectedly
+  String willTopic = String(TOPIC_PREFIX) + "/" + DEVICE_ID + "/status";
+  String willPayload = "{\"status\":\"offline\",\"deviceId\":\"" + String(DEVICE_ID) + "\"}";
+
+  while (!mqttClient.connect(clientId,
+    NULL, NULL,                          // no username/password
+    willTopic.c_str(), 1,               // will topic, QoS 1
+    false,                               // not retained
+    willPayload.c_str()                  // will payload
+  ) && tries < 5) {
     Serial.print("."); delay(2000); tries++;
   }
   if (mqttClient.connected()) {

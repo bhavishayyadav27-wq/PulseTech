@@ -62,7 +62,7 @@ let historyData = { soilMoisture: [], temperature: [], humidity: [], light: [] }
 let charts = {};
 let ws;
 let deviceTimeouts = {};           // per-device offline timer
-const DEVICE_TIMEOUT_MS = 30000;   // 30s no data = device offline
+const DEVICE_TIMEOUT_MS = 10000;   // 10s no data = device offline
 
 // Thresholds for UI status
 const THRESHOLDS = {
@@ -105,6 +105,10 @@ function connectWS() {
       addAlertToUI(msg.data);
     } else if (msg.type === 'deviceStatus') {
       updateDeviceStatus(msg.deviceId, msg.data);
+    } else if (msg.type === 'deviceOnline') {
+      setDeviceStatus(msg.deviceId, true);
+    } else if (msg.type === 'deviceOffline') {
+      setDeviceStatus(msg.deviceId, false);
     }
   };
 }
@@ -116,41 +120,47 @@ function setConnectionStatus(online) {
 }
 
 // ─── Device Online/Offline Tracking ──────────────────────────────────────────
-function markDeviceOnline(deviceId) {
-  // Clear existing timeout
-  if (deviceTimeouts[deviceId]) clearTimeout(deviceTimeouts[deviceId]);
+function setDeviceStatus(deviceId, online) {
+  if (devices[deviceId]) devices[deviceId].online = online;
 
-  // Update device status
-  if (devices[deviceId]) devices[deviceId].online = true;
-  updateDeviceBadge(deviceId, true);
+  renderDeviceTabs();
 
-  // Set timeout — if no data in 30s, mark offline
-  deviceTimeouts[deviceId] = setTimeout(() => {
-    if (devices[deviceId]) devices[deviceId].online = false;
-    updateDeviceBadge(deviceId, false);
-    // Update header if this is selected device
-    if (deviceId === selectedDevice) {
-      const el = document.getElementById('connection-status');
+  if (deviceId === selectedDevice) {
+    const el = document.getElementById('connection-status');
+    if (online) {
+      el.textContent = '● ESP32 Online';
+      el.className = 'badge badge-online';
+    } else {
       el.textContent = '● Device Offline';
       el.className = 'badge badge-offline';
+      clearCards(); // blank out live readings
     }
-  }, DEVICE_TIMEOUT_MS);
+  }
+}
 
-  // Update header badge for selected device
+function markDeviceOnline(deviceId) {
+  if (deviceTimeouts[deviceId]) clearTimeout(deviceTimeouts[deviceId]);
+  if (devices[deviceId]) devices[deviceId].online = true;
+  updateDeviceBadge(deviceId, true);
   if (deviceId === selectedDevice) {
     const el = document.getElementById('connection-status');
     el.textContent = '● ESP32 Online';
     el.className = 'badge badge-online';
   }
+  deviceTimeouts[deviceId] = setTimeout(() => {
+    if (devices[deviceId]) devices[deviceId].online = false;
+    updateDeviceBadge(deviceId, false);
+    if (deviceId === selectedDevice) {
+      const el = document.getElementById('connection-status');
+      el.textContent = '● Device Offline';
+      el.className = 'badge badge-offline';
+      clearCards();
+    }
+  }, DEVICE_TIMEOUT_MS);
 }
 
 function updateDeviceBadge(deviceId, online) {
-  const tabs = document.querySelectorAll('.device-tab');
-  tabs.forEach(tab => {
-    if (tab.textContent.replace(/[🟢🔴]/g, '').trim() === deviceId) {
-      tab.textContent = (online ? '🟢 ' : '🔴 ') + deviceId;
-    }
-  });
+  renderDeviceTabs();
 }
 
 // ─── Data Processing ──────────────────────────────────────────────────────────
@@ -185,6 +195,18 @@ function processReading(reading, silent = false) {
 }
 
 // ─── Cards ────────────────────────────────────────────────────────────────────
+function clearCards() {
+  ['soilMoisture', 'temperature', 'humidity'].forEach(key => {
+    document.getElementById(`val-${key}`).textContent = '--';
+    document.getElementById(`bar-${key}`).style.width = '0%';
+    const card = document.getElementById(`card-${key}`);
+    card.className = 'card';
+    const statusEl = document.getElementById(`status-${key}`);
+    statusEl.textContent = 'Offline';
+    statusEl.className = 'card-status status-offline';
+  });
+  document.getElementById('last-update').textContent = 'Device offline';
+}
 function updateCards(reading) {
   const sensors = [
     { key: 'soilMoisture', max: 100 },
@@ -235,8 +257,9 @@ function renderDeviceTabs() {
   container.innerHTML = '';
   Object.keys(devices).forEach(id => {
     const btn = document.createElement('button');
+    const online = devices[id].online;
     btn.className = `device-tab ${id === selectedDevice ? 'active' : ''}`;
-    btn.textContent = id;
+    btn.innerHTML = `<span style="color:${online ? '#4caf50' : '#e53935'}">${online ? '●' : '●'}</span> ${id}`;
     btn.onclick = () => selectDevice(id);
     container.appendChild(btn);
   });
