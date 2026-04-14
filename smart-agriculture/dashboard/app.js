@@ -78,8 +78,8 @@ function connectWS() {
 
   ws.onopen = () => {
     const el = document.getElementById('connection-status');
-    el.textContent = '● Server Connected';
-    el.className = 'badge badge-online';
+    el.textContent = '● Waiting for Device...';
+    el.className = 'badge badge-offline';
   };
   ws.onclose = () => {
     const el = document.getElementById('connection-status');
@@ -162,7 +162,7 @@ function processReading(reading, silent = false) {
 
   // Register device
   if (!devices[deviceId]) {
-    devices[deviceId] = { id: deviceId, readings: [] };
+    devices[deviceId] = { id: deviceId, readings: [], online: false };
     renderDeviceTabs();
     if (!selectedDevice) selectDevice(deviceId);
   }
@@ -416,6 +416,26 @@ function initDashboard() {
   initCharts();
   connectWS();
   loadInitialData();
+
+  // Start with "waiting for device" status, update once data arrives
+  setTimeout(() => {
+    Object.keys(devices).forEach(deviceId => {
+      if (!devices[deviceId].online) {
+        updateDeviceBadge(deviceId, false);
+        if (deviceId === selectedDevice) {
+          const el = document.getElementById('connection-status');
+          el.textContent = '● Device Offline';
+          el.className = 'badge badge-offline';
+        }
+      }
+    });
+    // If no devices at all yet
+    if (Object.keys(devices).length === 0) {
+      const el = document.getElementById('connection-status');
+      el.textContent = '● No Device';
+      el.className = 'badge badge-offline';
+    }
+  }, DEVICE_TIMEOUT_MS);
 }
 
 // Auto-start if already authenticated
